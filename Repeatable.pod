@@ -1,0 +1,61 @@
+=head1 Catalyst and jQuery
+
+=head1 SYNOPSIS
+
+This article will outline the steps needed to use the jQuery JavaScript library.
+jQuery can be used in your applications to do many things, but certainly one of
+the most useful bits is the ability to make forms dynamic.  Even within this
+scope there is much that jQuery has to offer.  For the purposes of this article
+we will focus on using jQuery to dynamically add input fields to a 
+HTML::FormHandler form.
+
+=head1 REQUIREMENTS
+
+Catalyst
+
+HTML::FormHandler & HTML::FormHandler::DBIC
+
+DBIx::Class
+
+jQuery Javascript Library - details found here <L http://jquery.com>
+
+=head1 Form Description
+
+=over4
+
+We will be creating a simplistic pizza ordering form as a backdrop for our demo.
+Our form will have only a couple of options (size, crust, toppings), but as most
+of us vary greatly in the number of toppings we like on our pies, we should like
+to make our form flexible enough to enter no toppings(unadventurous!) or several
+toppings.  This is where jQuery comes in very nicely.
+
+=back
+
+=head1 Database
+
+=over4
+
+Our database has tables for 'Pizzas', 'Toppings', and 'PizzaToppings', where 
+'PizzaToppings' belongs to both 'Pizzas' and 'Toppings', and where 'Toppings'
+belong to 'Pizzas' via the following many_to_many pseudo-relationship.
+
+__PACKAGE__->many_to_many( "toppings" => "pizzatoppings" , "toppingid" );
+
+Note: If your database does not allow you to define relationships, you will
+need to create the 'has_many' and 'belongs_to' relationships in the DBIC schemas
+manually.  Otherwise, the above code should be the only necessary change to the
+model code.
+
+=head1 HTML::FormHandler::DBIC Form - Pizza.pm
+
+has '+item_class' => ( default => 'Pizza' );
+
+has_field 'description' =>
+  ( type => 'Text', label => 'Description', required => 1 );
+
+has_field 'crust' => ( type => 'Text', default => 'Thin Crust' );
+
+has_field 'toppings' =>  # "toppings" refers to the m2m relationship in schema.
+  ( type => 'Repeatable', label => 'Toppings', num_when_empty => 1 );
+
+has_field 'toppings.id' => ( type => 'PrimaryKey' );
